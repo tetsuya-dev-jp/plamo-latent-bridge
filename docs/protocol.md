@@ -1,0 +1,59 @@
+# PLaMo latent bridge: exploratory experiment protocol
+
+## Objective and deliverables
+
+Connect frozen PLaMo 3 Translate hidden states to a separate frozen causal language model through a trainable bridge. Run actual comparative experiments, publish reproducible code and results, and write an English LaTeX report with a compiled PDF. The implementation is delegated to DeepSeek V4.1 Flash. Positive results are not a completion requirement.
+
+This is a personal exploratory project, separate from the lab's fMRI study. No proprietary or personal data are inputs. Publish code, generated data, measured results, report sources and PDF, but not upstream model weights, feature caches, credentials, or raw agent transcripts.
+
+## Models and compute
+
+- Source: `pfnet/plamo-3-translate-0.8b`, frozen, BF16 where supported; capture hidden states at layers 4, 8 and 16. Record the exact resolved upstream revisions.
+- Target: `Qwen/Qwen2.5-1.5B-Instruct`, frozen, BF16, eager attention as necessary for ROCm compatibility. Use its own tokenizer and chat template.
+- GPU: AMD Radeon RX 9070 XT, approximately 16 GiB; a GPU matrix multiplication succeeded in the installed PyTorch 2.12 ROCm runtime on 2026-11-08.
+- Preserve the existing research environment. Use a project virtual environment that can reuse installed ROCm PyTorch without replacing it. Record versions and actual peak allocated GPU memory.
+
+## Architecture and supervision
+
+Encode only the source question, with the official translation request prefix where appropriate; no reference answer or target translation enters source feature extraction. Pool valid, non-padding source token states into an ordered prefix (main: 16 tokens; ablation: 4). A small projection maps these states into target embedding dimensions. Concatenate the projected prefix with a fixed English answer instruction represented using the target tokenizer. Train only the projection with teacher-forced answer cross-entropy. Do not detach the target forward pass: gradients must pass through the frozen target into the bridge.
+
+Neither target reasoning traces nor target answers are available during evaluation. Free-running greedy answers are the primary endpoint; teacher-forced losses are diagnostics only. Strip only documented formatting and normalize numeric strings for exact-match scoring. Publish raw answers and token-level generation limits.
+
+## Data and partitions
+
+Use reproducible procedurally generated Japanese/English paired short arithmetic word problems spanning addition, subtraction, multiplication and a two-step composition. Answers are computed exactly. Keep semantic tuples disjoint between train, validation and test, independently of surface text. Fix the generator seed and save the generated dataset before model runs. Start with 1,024 train, 128 validation and 256 test examples, balanced by operation. Add a separate 128-example test using held-out surface templates. These are controlled synthetic tasks, not evidence of broad multilingual reasoning.
+
+Use an external natural-language evaluation if feasible: the public Japanese MGSM test split, with its reference answers strictly evaluation-only. Report this separately; synthetic-only training and pretraining contamination limitations must be explicit. Do not manufacture any benchmark result when download or execution fails.
+
+## Comparisons
+
+Use identical test items and target answer instructions:
+
+1. Frozen target, direct Japanese question.
+2. Frozen target, paired English question (controlled reference-language diagnostic).
+3. PLaMo-generated English translation, then frozen target.
+4. Trained latent bridge (main layer 8, prefix 16), three seeds: 11, 23, 37.
+5. Layer ablations 4 and 16 (seed 11).
+6. Prefix length 4 (layer 8, seed 11).
+7. Untrained bridge and shuffled-source-feature test controls, with explicit shuffle mapping.
+8. A text-conditioned learned soft-prefix baseline, supervised on the same training examples, with source Japanese still provided as ordinary target text. Record its smaller parameter count; do not call it parameter matched.
+
+The learned bridge has task supervision that the three frozen textual baselines do not. State this asymmetry prominently. Use validation loss to choose epoch/checkpoint. Fix all choices before final test evaluation and retain any exploratory test exposure in the record.
+
+## Training, measurements and checks
+
+Benchmark a small batch before full runs; choose a feasible batch size without changing the research question. Initial candidates: AdamW, learning rate 1e-3, up to 10 epochs, batch 8, gradient clipping 1.0. Record actual settings and changes; select checkpoints using validation data only. Save per-epoch loss, validation loss, elapsed times, peak memory, selected checkpoint, every per-item prediction and metrics.
+
+Check split disjointness, arithmetic answers, masking/pooling, causal answer loss alignment, that only bridge parameters receive gradients, and that bridge parameters update while both backbones remain frozen. Include tiny tests that do not need downloading full model weights. Avoid artifact hashes.
+
+Report per-condition exact match, per-operation and held-out-template results, seed variation, learning curves and paired item bootstrap confidence intervals for selected differences. Explain the resampling unit; do not treat correlated training seeds as independent test items. Distinguish measured throughput from expected performance, and source extraction/translation costs from target decoding costs.
+
+## Sources
+
+- PLaMo model and implementation: https://huggingface.co/pfnet/plamo-3-translate-0.8b
+- Qwen target: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct
+- LangBridge, ACL 2024: https://aclanthology.org/2024.acl-long.405/
+
+## Completion evidence
+
+Passing scoped tests; real model feature extraction and bridge training; real comparisons and controls with inspectable predictions; English report `.tex` and visually checked PDF consistent with result files; a public GitHub repository containing reviewed publishable artifacts and verified remote visibility. Keep unfinished requirements visible until achieved.
