@@ -15,9 +15,9 @@ This is a personal exploratory project, separate from the lab's fMRI study. No p
 
 ## Architecture and supervision
 
-Encode only the source question, with the official translation request prefix where appropriate; no reference answer or target translation enters source feature extraction. Pool valid, non-padding source token states into an ordered prefix (main: 16 tokens; ablation: 4). A small projection maps these states into target embedding dimensions. Concatenate the projected prefix with a fixed English answer instruction represented using the target tokenizer. Train only the projection with teacher-forced answer cross-entropy. Do not detach the target forward pass: gradients must pass through the frozen target into the bridge.
+Encode only the source question, with the official translation request prefix where appropriate; no reference answer or target translation enters source feature extraction. Pool valid, non-padding source token states into an ordered prefix (main: 16 tokens; ablation: 4). Use ordered contiguous bins spanning the full valid sequence, including its final state; that final causal state must be computed after the complete source question. Record the exact pooling rule and whether prompt-format tokens are included. A small projection maps these states into target embedding dimensions. Concatenate the projected prefix with a fixed English answer instruction represented using the target tokenizer. Train only the projection with teacher-forced answer cross-entropy. Do not detach the target forward pass: gradients must pass through the frozen target into the bridge.
 
-Neither target reasoning traces nor target answers are available during evaluation. Free-running greedy answers are the primary endpoint; teacher-forced losses are diagnostics only. Strip only documented formatting and normalize numeric strings for exact-match scoring. Publish raw answers and token-level generation limits.
+Training and free generation must share exactly the same template-complete prompt, prefix position and assistant-answer boundary. Supervise the first answer token through the answer termination token, masking all prompt and padding positions; start free generation at that same boundary. Neither target reasoning traces nor target answers are available during evaluation. Free-running greedy answers are the primary endpoint; teacher-forced losses are diagnostics only. The originally planned strict exact-match score strips documented formatting and normalizes numeric strings. Also report a separately labeled last-number exact-match diagnostic, using a documented numeric extraction rule, because strict numeric-only compliance is not equivalent to arithmetic correctness. Publish raw answers, both scores, generation lengths, termination status and token caps. Use 128 answer tokens for all synthetic conditions and 256 for all external MGSM conditions; use up to 512 tokens for MGSM translation.
 
 ## Data and partitions
 
@@ -47,6 +47,12 @@ Benchmark a small batch before full runs; choose a feasible batch size without c
 Check split disjointness, arithmetic answers, masking/pooling, causal answer loss alignment, that only bridge parameters receive gradients, and that bridge parameters update while both backbones remain frozen. Include tiny tests that do not need downloading full model weights. Avoid artifact hashes.
 
 Report per-condition exact match, per-operation and held-out-template results, seed variation, learning curves and paired item bootstrap confidence intervals for selected differences. Explain the resampling unit; do not treat correlated training seeds as independent test items. Distinguish measured throughput from expected performance, and source extraction/translation costs from target decoding costs.
+
+## Pre-full-run pilot observations and amendments
+
+A wiring smoke used eight training items, four validation items and four items from each preliminary evaluation split, with a 16-token answer cap. It verified real source extraction, one optimizer step and generation, but is not quantitative evidence for model comparison. Inspection of those pilot outputs found mathematically correct answers accompanied by explanations that failed strict exact match. The secondary last-number diagnostic and larger, shared decoding caps above were specified before full runs to expose this formatting confound. Preserve the strict score as originally planned; do not relabel formatting improvements as reasoning improvements.
+
+A separate generator audit found two train/test duplicates after canonicalizing the two multiplicative operands in two-step arithmetic. Correct the key construction and regenerate canonical data before full runs. The pilot and revised full dataset are exploratory, not a preregistered confirmatory evaluation; document their separation and any reused semantic examples.
 
 ## Sources
 

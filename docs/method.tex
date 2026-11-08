@@ -1,0 +1,55 @@
+\section{Interface and learning objective}
+
+Let $q$ be a Japanese question and let $P(q)$ be its official PLaMo translation-request prompt, with Japanese as the source language and English as the requested output language.
+The prompt ends at the start of the translation output; it contains neither a reference translation nor an answer.
+At source layer $\ell$, a forward pass gives states
+$H^{(\ell)} \in \mathbb{R}^{T\times d_s}$ for the $T$ valid prompt tokens.
+The selected source layers are 4, 8 and 16, with layer 8 used for the main configuration.
+PLaMo's causal attention means that the final valid state is computed after the complete question, while earlier states have access only to preceding input.
+
+Ordered contiguous bins compress these states to a prefix of length $K$.
+For bin $j=0,\ldots,K-1$, define
+\begin{equation}
+ a_j=\left\lfloor\frac{jT}{K}\right\rfloor,
+ \qquad
+ b_j=\left\lfloor\frac{(j+1)T}{K}\right\rfloor,
+ \qquad
+ \bar h_j=\frac{1}{b_j-a_j}\sum_{t=a_j}^{b_j-1}H^{(\ell)}_t.
+ \label{eq:pooling}
+\end{equation}
+Equation~\ref{eq:pooling} applies when $T\geq K$, as in the experimental prompts.
+The implementation repeats the corresponding valid state for an empty bin when $T<K$.
+Padding is removed before binning; translation-format tokens remain included.
+The last bin includes the final valid state.
+The main prefix has $K=16$, with $K=4$ as an ablation.
+
+A shared affine map produces target-space embeddings:
+\begin{equation}
+ z_j=W\bar h_j+b,
+ \qquad W\in\mathbb{R}^{d_t\times d_s},
+ \quad b\in\mathbb{R}^{d_t}.
+ \label{eq:bridge}
+\end{equation}
+Both models have hidden size 1,536 in the selected configurations, so this bridge has 2,360,832 trainable parameters.
+Equal dimensions do not make their representation spaces interchangeable; $W$ and $b$ are learned.
+The projected prefix replaces a temporary marker inside the target chat template's user message.
+The rest of the prompt asks for the final numeric answer, and the normal assistant-generation boundary follows it.
+The marker itself is not embedded by the target model.
+The target receives no Japanese question tokens on the bridge path.
+
+For answer tokens $y_1,\ldots,y_M$, including the termination token, training minimizes
+\begin{equation}
+ \mathcal{L}(W,b)
+ =-\frac{1}{M}\sum_{m=1}^{M}
+ \log p_{\theta}\!\left(y_m\mid U_1,Z,U_2,y_{<m}\right),
+ \label{eq:loss}
+\end{equation}
+where $U_1$ and $U_2$ are the fixed template and instruction segments, $Z=(z_0,\ldots,z_{K-1})$, and $\theta$ denotes the frozen target parameters.
+Prompt and padding positions are excluded from the loss.
+The target forward pass remains differentiable so that gradients reach the bridge through the frozen target.
+Source states are cached without gradients.
+At evaluation, greedy decoding starts at the same assistant boundary without answer tokens or teacher forcing.
+
+The supervised textual baseline replaces $Z$ with $K$ learned embeddings shared across questions and keeps the Japanese question in ordinary target text.
+At $K=16$ it has 24,576 trainable parameters.
+It therefore matches the training examples but neither the parameter count nor the information path of the bridge.
