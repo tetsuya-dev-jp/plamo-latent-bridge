@@ -1,0 +1,22 @@
+{
+  "study": "PLaMo translation hidden-state bridge to a frozen Qwen LM",
+  "started_at_utc": "2026-11-08T01:40:15Z",
+  "code_commit": "a2f72d56c189cb98d95fd15a7d1772a815feb3d6",
+  "command": "PYTHONUNBUFFERED=1 bash -x scripts/run_full_experiment.sh",
+  "configuration": "configs/default.json",
+  "implementation_model": "opencode-go/deepseek-v4.1-flash",
+  "pre_run_offline_tests": {
+    "passed": 32,
+    "warnings": 1,
+    "warning": "Inherited anyio pytest plugin deprecation"
+  },
+  "data_generator_seed": 20261108,
+  "backbones_frozen": true,
+  "source_feature_cache_published": false,
+  "upstream_weights_published": false,
+  "notes": "Pilot artifacts are isolated from the full run. All Python and experiment shell implementation was delegated to DeepSeek V4.1 Flash; experimental design, review and report were managed by the lead agent.",
+  "exit_code": 0,
+  "verified_complete_at_utc": "2026-11-08T02:24:17.430354+00:00",
+  "analysis_and_diagnostic_commit": "5becef5e7d8e1fd2ee82d8c88ce132a791ba6066",
+  "final_verification": "results/main/provenance/verification.json"
+}

@@ -1,0 +1,57 @@
+\section{Interpretation and next experiment}
+
+For this model pair and training budget, retaining the question as text is the
+better-supported practical choice.
+The translation pipeline is substantially more accurate than the latent bridge
+under the numeric diagnostic, and a much smaller learned textual prefix performs
+best on the controlled single-step tasks.
+The bridge's synthetic source-shuffling effect and small-set memorization show
+that a learned numerical connection is possible.
+They do not establish that this interface transfers the translation model's
+multilingual competence or improves the target's reasoning.
+
+Several differences limit comparison with LangBridge's reported gains.
+The source here is a causal translation decoder rather than a bidirectional
+multilingual encoder; its intermediate states are compressed into fixed bins.
+Alignment uses only 1,024 Japanese question--answer pairs with short numeric
+targets, rather than a large English alignment corpus.
+The source states are used at their native scales.
+A post hoc descriptive calculation on the pooled training features gives RMS
+values of 11.24, 16.95 and 0.726 for layers 4, 8 and 16, respectively.
+Layer ablations therefore change both the represented information and its scale.
+These observations identify differences to investigate, not demonstrated causes
+of the accuracy gap.
+
+The main limitations are the small generated training distribution, a single
+source/target model pair, one training seed for each ablation and the exploratory
+test exposure described in Section~\ref{sec:experiments}.
+Bootstrap intervals describe item variation conditional on those fits, not broad
+model or language generalization.
+MGSM also differs substantially from the generated tasks, and pretraining
+exposure to benchmark material cannot be ruled out.
+The output cap and the last-number diagnostic further restrict interpretation of
+the frozen models' long explanations.
+Conversely, the learned textual prefix's strong single-step scores do not extend
+to two-step questions or establish a natural-benchmark improvement.
+
+A useful next experiment is to test whether the same bridge can reconstruct the
+paired English question from its source states before fitting answer generation.
+This would provide a direct check of information recovery through the interface
+and denser alignment supervision.
+It should be compared with direct answer fitting at a controlled data and compute
+budget, while preserving an untouched evaluation set.
+Normalizing native feature scales is a separate, inexpensive control before
+attributing differences to source-layer depth.
+Neither modification has been evaluated in the present study.
+
+\section{Conclusion}
+
+A frozen PLaMo translation model can be connected differentiably to a frozen
+Qwen model through a small learned projection, and the connection can memorize
+a tiny source-dependent answer mapping.
+The tested affine, pooled interface nevertheless has low accuracy on both its
+larger training set and held-out questions.
+Ordinary text input, with translation or a learned textual prefix, is markedly
+more effective in this setting.
+The experiment supports further interface-alignment diagnostics rather than a
+claim of improved multilingual reasoning from hidden-state injection alone.

@@ -1,0 +1,15 @@
+{
+  "purpose": "Post hoc descriptive diagnostic; no training or checkpoint choice uses these values",
+  "split": "train",
+  "n_items": 1024,
+  "prefix_length": 16,
+  "feature_shape": [1024, 16, 1536],
+  "definition": "sqrt(mean(square(x), accumulated in float64)) over all cached pooled training features",
+  "source_files": "features/train_layer{layer}_k16.npy",
+  "pooled_feature_rms": {
+    "4": 11.240776478116556,
+    "8": 16.94821712907543,
+    "16": 0.7260694549774884
+  },
+  "interpretation": "Native layer representations differ in both content and scale; layer comparisons do not isolate depth or semantic quality"
+}

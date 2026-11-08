@@ -10,3 +10,4 @@ runs/**/optimizer.pt
 data/mgsm_ja_test.jsonl
 data/mgsm_meta.json
 *.log
+docs/.build/

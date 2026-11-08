@@ -1,10 +1,10 @@
 # PLaMo latent bridge: exploratory experiment protocol
 
-## Objective and deliverables
+## Objective and scope
 
-Connect frozen PLaMo 3 Translate hidden states to a separate frozen causal language model through a trainable bridge. Run actual comparative experiments, publish reproducible code and results, and write an English LaTeX report with a compiled PDF. The implementation is delegated to DeepSeek V4.1 Flash. Positive results are not a completion requirement.
+Test whether frozen PLaMo 3 Translate hidden states can provide useful inputs to a separate frozen causal language model through a trainable bridge. Compare this interface with ordinary text inputs and controls, retaining negative results and per-item evidence. Experimental implementation was produced with DeepSeek V4.1 Flash.
 
-This is a personal exploratory project, separate from the lab's fMRI study. No proprietary or personal data are inputs. Publish code, generated data, measured results, report sources and PDF, but not upstream model weights, feature caches, credentials, or raw agent transcripts.
+The inputs are generated arithmetic questions and public Japanese MGSM questions. Public artifacts include code, generated data, measured results and the report; upstream model weights and feature caches are obtained locally.
 
 ## Models and compute
 
@@ -62,6 +62,6 @@ A separate generator audit found two train/test duplicates after canonicalizing 
 - Qwen target: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct
 - LangBridge, ACL 2024: https://aclanthology.org/2024.acl-long.405/
 
-## Completion evidence
+## Execution records
 
-Passing scoped tests; real model feature extraction and bridge training; real comparisons and controls with inspectable predictions; English report `.tex` and visually checked PDF consistent with result files; a public GitHub repository containing reviewed publishable artifacts and verified remote visibility. Keep unfinished requirements visible until achieved.
+The primary matrix and the later resubstitution diagnostic have separate configurations, predictions, run histories and provenance records. The English report presents their results and distinguishes implementation checks, memorization capacity and held-out task performance.

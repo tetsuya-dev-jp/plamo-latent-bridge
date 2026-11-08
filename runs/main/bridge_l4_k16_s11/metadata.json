@@ -1,0 +1,52 @@
+{
+  "run_id": "bridge_l4_k16_s11",
+  "experiment_id": "main",
+  "condition": "bridge",
+  "layer": 4,
+  "prefix_length": 16,
+  "seed": 11,
+  "train_items": 1024,
+  "val_items": 128,
+  "best_epoch": 10,
+  "best_val_loss": 1.3930463356096388,
+  "trainable_parameters": 2360832,
+  "target_model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "target_revision_requested": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "target_revision_resolved": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "source_model_id": "pfnet/plamo-3-translate-0.8b",
+  "source_revision_requested": "2c6192f709695aa4b50f73713620651a533b88c9",
+  "source_revision_resolved": "2c6192f709695aa4b50f73713620651a533b88c9",
+  "instruction": "Solve the following arithmetic problem. Give only the final number.",
+  "training": {
+    "batch_size": 16,
+    "epochs": 10,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0
+  },
+  "load_seconds": 3.342,
+  "training_seconds": 85.039,
+  "elapsed_seconds": 88.381,
+  "peak_gpu_memory_gib": 6.933,
+  "environment": {
+    "python": "3.12.15 (main, Oct  3 2026, 01:03:07) [Clang 22.1.3 ]",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "packages": {
+      "torch": "2.12.0+rocm7.14.0",
+      "transformers": "4.57.1",
+      "accelerate": "1.15.0",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "matplotlib": "3.11.2",
+      "numba": "0.68.1"
+    },
+    "torch": {
+      "version": "2.12.0+rocm7.14.0",
+      "cuda_available": true,
+      "device_count": 1,
+      "device_name": "AMD Radeon RX 9070 XT",
+      "total_memory_gib": 15.922
+    }
+  },
+  "created_at": "2026-11-08T01:56:15.585871+00:00"
+}

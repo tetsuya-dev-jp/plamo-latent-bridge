@@ -1,0 +1,7 @@
+{
+  "source_url": "https://raw.githubusercontent.com/google-research/url-nlp/452a21ad3dae5668c06ceeac21ff073e1e40f9be/mgsm/mgsm_ja.tsv",
+  "source_commit": "452a21ad3dae5668c06ceeac21ff073e1e40f9be",
+  "source_project": "google-research/url-nlp MGSM",
+  "count": 250,
+  "note": "Japanese MGSM test split. Reference answers are evaluation-only."
+}

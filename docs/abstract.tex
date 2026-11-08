@@ -1,0 +1,18 @@
+We test a learned connection from PLaMo 3 Translate 0.8B hidden states to
+Qwen2.5-1.5B-Instruct while freezing both pretrained backbones.
+An affine projection converts pooled source states into a target soft prefix
+and is fitted on 1,024 Japanese arithmetic questions.
+Across three initializations, the main bridge achieves 4.3\% mean synthetic test
+accuracy, compared with 53.1\% for generated English translation supplied as
+ordinary text and 73.8\% for a learned textual prefix with far fewer parameters;
+these figures use a last-number diagnostic that tolerates explanations.
+The bridge reaches 1.6\% on Japanese MGSM.
+Source shuffling lowers the seed-11 synthetic score, but the gain over an
+untrained interface is inconclusive under the numeric diagnostic.
+A separate 16-question resubstitution experiment confirms that the bridge can
+memorize source-dependent answers, while its main fit also has low training
+accuracy.
+Raw predictions, strict-format scores, decoding-cap counts, layer and prefix
+ablations, paired intervals and reproducible code document this negative result.
+For the tested configuration, preserving question text is substantially more
+effective than injecting translation hidden states without further alignment.

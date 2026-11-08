@@ -1,0 +1,79 @@
+\section{Reproduction and recorded settings}
+\label{sec:settings}
+
+The experiment implementation is versioned at Git commit
+\texttt{a2f72d5} (full revision in the execution record).
+The final plotting changes and isolated capacity-diagnostic script are versioned
+at \texttt{5becef5}; primary training and
+answer-generation code is unchanged between these commits.
+The execution record, upstream revisions and measured environment are stored in
+\path{results/main/provenance/}.
+Generated questions, raw predictions, fitted-run histories, selected-epoch metadata
+and result-driven figures are included in the repository.
+Upstream weights and source-feature caches are downloaded or generated locally.
+The public code license does not replace the upstream model or MGSM licenses.
+
+The full experiment is run from the repository root:
+\begin{verbatim}
+bash scripts/run_full_experiment.sh
+\end{verbatim}
+The script generates the fixed data, extracts source states, generates actual
+translations, evaluates the frozen textual systems, trains all fitted conditions,
+evaluates their held-out outputs and produces the summary and figures.
+The project README describes environment preparation and individual commands.
+The separate resubstitution diagnostic is reproduced with
+\texttt{bash scripts/run\_overfit\_diagnostic.sh}.
+The isolated smoke command and offline test suite are:
+\begin{verbatim}
+.venv/bin/python -m plamo_bridge --config configs/smoke.json \
+  smoke --regenerate-data --overwrite
+.venv/bin/python -m pytest
+\end{verbatim}
+
+The implementation was produced with DeepSeek V4.1 Flash.
+Tests check arithmetic references and canonical split keys, valid-token pooling,
+prompt and answer boundaries, causal loss alignment, bridge gradients with frozen
+target parameters, variable-length batched generation, fractional seed averages,
+and feature/translation cache provenance.
+A real-model GPU smoke verifies the complete source-to-target path.
+These checks establish implementation properties; task performance comes from
+the separate full evaluations reported above.
+
+Table~\ref{tab:settings} lists the fixed settings and their canonical records.
+Selected epochs, losses, wall times and peak allocated memory are recorded per
+run rather than inferred from the nominal configuration.
+Timing scopes distinguish model loading, source extraction, translation and target
+answer generation.
+They describe this implementation on this host, rather than a calibrated hardware
+benchmark or a general deployment latency claim.
+
+\begin{table}[p]
+\caption{Fixed experimental settings and authoritative records}
+\label{tab:settings}
+\centering\small\sffamily
+\begin{tabularx}{\linewidth}{@{}p{0.22\linewidth}Xp{0.25\linewidth}@{}}
+\toprule
+Setting & Value & Record \\
+\midrule
+Source model & PLaMo 3 Translate 0.8B; 16 layers; hidden size 1,536 & Model config; feature manifests \\
+Source revision & \texttt{2c6192f7} (full revision in configuration) & \path{configs/default.json} \\
+Target model & Qwen2.5-1.5B-Instruct; 28 layers; hidden size 1,536 & Model config; run metadata \\
+Target revision & \texttt{989aa798} (full revision in configuration) & \path{configs/default.json} \\
+Representations & Layers 4, 8, 16; ordered valid-token pooling; $K=16$ or $4$ & Feature manifests \\
+Trainable parameters & Affine bridge: 2,360,832; soft prefix: 24,576 & Fitted-run metadata \\
+Numerical precision & BF16 pretrained backbones; FP32 projection and pooled cache & Configuration; implementation \\
+Generated partitions & Train 1,024; validation 128; test 256; wording holdout 128 & \path{data/dataset_meta.json} \\
+Generator seed & 20261108; disjoint canonical numeric tuples & Dataset metadata \\
+External endpoint & All 250 Japanese MGSM test items; evaluation only & MGSM source provenance \\
+Initialization seeds & Main bridge: 11, 23, 37; other fitted conditions: 11 & Fitted-run configuration \\
+Optimizer & AdamW; learning rate $10^{-3}$; weight decay 0 & Fitted-run configuration \\
+Training budget & Batch 16; ten epochs; gradient clip norm 1.0 & Fitted-run configuration \\
+Checkpoint rule & Lowest validation answer-token cross-entropy & History and run metadata \\
+Answer decoding & Greedy; 128 tokens on generated tasks; 256 on MGSM & Prediction metadata \\
+Translation decoding & Greedy; 128 tokens on generated tasks; 512 on MGSM & Translation metadata \\
+Uncertainty & 10,000 paired item bootstrap resamples; seed 20261108 & Summary JSON \\
+Compute & AMD Radeon RX 9070 XT; 15.922 GiB reported VRAM; six CPU threads & Environment; configuration \\
+Runtime & PyTorch 2.12.0 with ROCm 7.14; Transformers 4.57.1 & Environment JSON \\
+\bottomrule
+\end{tabularx}
+\end{table}

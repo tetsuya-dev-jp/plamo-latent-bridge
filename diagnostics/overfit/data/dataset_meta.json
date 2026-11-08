@@ -1,0 +1,56 @@
+{
+  "seed": 20261110,
+  "counts": {
+    "train": 16,
+    "val": 16,
+    "test": 4,
+    "heldout": 4
+  },
+  "operations": [
+    "addition",
+    "subtraction",
+    "multiplication",
+    "two_step"
+  ],
+  "template_ids": {
+    "train": [
+      "main_add_receive",
+      "main_add_shop",
+      "main_mul_bags",
+      "main_mul_boxes",
+      "main_sub_give",
+      "main_sub_use",
+      "main_two_box_use",
+      "main_two_buy_give"
+    ],
+    "val": [
+      "main_add_receive",
+      "main_add_shop",
+      "main_mul_bags",
+      "main_mul_boxes",
+      "main_sub_give",
+      "main_sub_use",
+      "main_two_box_use",
+      "main_two_buy_give"
+    ],
+    "test": [
+      "main_add_receive",
+      "main_mul_boxes",
+      "main_sub_give",
+      "main_two_box_use"
+    ],
+    "heldout": [
+      "heldout_add_home",
+      "heldout_mul_prepare",
+      "heldout_sub_lost",
+      "heldout_two_order_use"
+    ]
+  },
+  "semantic_key_rule": "Commutative operand pairs are sorted before key construction, including the first two operands of two-step add/sub and mul/sub problems.",
+  "note": "Diagnostic-only resubstitution data: the 16 validation items are an exact copy of the 16 training items, so train and validation are intentionally not disjoint. This split cannot measure held-out generalization.",
+  "validation_policy": "resubstitution_same_items_as_train",
+  "diagnostic_only": true,
+  "splits_disjoint": false,
+  "held_out_evaluation": false,
+  "interpretation": "Post hoc capacity check only. Success means the bridge can memorize a tiny supervised mapping; it is not evidence of generalization."
+}

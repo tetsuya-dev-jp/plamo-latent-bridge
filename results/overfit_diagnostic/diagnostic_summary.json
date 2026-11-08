@@ -1,0 +1,18 @@
+{
+  "diagnostic_only": true,
+  "validation_policy": "resubstitution_same_items_as_train",
+  "source_commit": "5becef5e7d8e1fd2ee82d8c88ce132a791ba6066",
+  "started_at_utc": "2026-11-08T02:16:33Z",
+  "verified_complete_at_utc": "2026-11-08T02:18:29.539636+00:00",
+  "command": "bash scripts/run_overfit_diagnostic.sh",
+  "exit_code": 0,
+  "n_train": 16,
+  "correct_train": 16,
+  "correct_shuffled_against_original_target": 3,
+  "correct_shuffled_against_supplied_source": 16,
+  "shuffle_fixed_points": 1,
+  "selected_epoch": 100,
+  "selected_resubstitution_ce": 0.000128398484146321,
+  "metadata": "runs/overfit_diagnostic/bridge_l8_k16_s11/metadata.json",
+  "interpretation": "Small-set memorization only; no held-out generalization claim"
+}

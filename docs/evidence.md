@@ -1,6 +1,6 @@
 # Source evidence and interpretation boundaries
 
-Retrieved 2026-11-08. These notes distinguish source claims from this project's hypotheses and measured results. Experimental result files, rather than this literature note, will be the authority for reported numbers.
+Retrieved 2026-11-08. These notes distinguish source claims from this project's hypotheses and measured results. Experimental result files, rather than this literature note, are the authority for reported numbers.
 
 ## PLaMo 3 Translate
 
@@ -32,7 +32,7 @@ Use the model's own tokenizer and chat template. The card lists the target under
 
 Freda Shi and colleagues. *Language Models are Multilingual Chain-of-Thought Reasoners*. arXiv:2210.03057 (2022). https://arxiv.org/abs/2210.03057
 
-The abstract describes manually translating 250 GSM8K problems into ten languages. The distribution used by this project is https://huggingface.co/datasets/juletxara/mgsm ; if evaluated, save the exact dataset revision and selected item IDs, and keep references unavailable to training. The proposed numeric-only zero-shot decoding differs from the original chain-of-thought prompting study. Report that protocol explicitly. Benchmark pretraining contamination cannot be ruled out.
+The abstract describes manually translating 250 GSM8K problems into ten languages. This project uses the official Japanese TSV from https://github.com/google-research/url-nlp/tree/452a21ad3dae5668c06ceeac21ff073e1e40f9be/mgsm , with source provenance and per-item evaluation IDs retained. Its CC BY 4.0 license is in the MGSM subdirectory. Reference answers are used only for scoring. The numeric-only zero-shot decoding differs from the original chain-of-thought prompting study. Benchmark pretraining contamination cannot be ruled out.
 
 ## Planned interpretations
 

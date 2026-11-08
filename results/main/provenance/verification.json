@@ -1,0 +1,23 @@
+{
+  "verified_at_utc": "2026-11-08T02:24:17.430354+00:00",
+  "primary_prediction_files": 35,
+  "primary_predictions": 7358,
+  "additional_train_predictions": 1024,
+  "checks": [
+    "Every prediction ID and gold matches its split",
+    "Stored strict and last-number scores match raw outputs",
+    "Summary counts match per-item predictions",
+    "Primary canonical semantic keys are disjoint across four partitions",
+    "Selected checkpoints minimize recorded validation loss",
+    "Translation questions and coverage match the source data; no cap hits",
+    "Saved shuffle mappings are permutations"
+  ],
+  "offline_tests": {
+    "passed": 33,
+    "warnings": 1,
+    "warning": "Inherited anyio pytest plugin deprecation"
+  },
+  "independent_scientific_review": "No material numerical or interpretation errors found",
+  "report_visual_review": "All 10 pages inspected; no clipping or overlapping content",
+  "limitations": "Single model pair and hardware host; raw model outputs are subject to stated finite token budgets and scoring rules"
+}

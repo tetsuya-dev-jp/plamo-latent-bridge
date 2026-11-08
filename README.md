@@ -1,13 +1,31 @@
 # PLaMo latent bridge
 
-Small exploratory experiment connecting frozen hidden states from
+An exploratory study connecting frozen hidden states from
 `pfnet/plamo-3-translate-0.8b` to the frozen causal language model
 `Qwen/Qwen2.5-1.5B-Instruct` through a trainable projection.
 
-This is a controlled synthetic arithmetic study. It is not evidence of broad
-multilingual reasoning. The latent bridge receives task supervision that the
-three frozen textual baselines do not; that asymmetry is part of the design
-and must be reported with every comparison.
+The tested hidden-state bridge is substantially less accurate than retaining
+question text. With the last-number diagnostic, the main bridge averages 4.3%
+on the synthetic test across three seeds; PLaMo translation followed by ordinary
+text input reaches 53.1%, and a learned textual prefix reaches 73.8%.
+
+| Method | Synthetic test | Template holdout | Japanese MGSM |
+| --- | ---: | ---: | ---: |
+| Main bridge, mean of 3 seeds | 4.3% | 1.0% | 1.6% |
+| Frozen target with PLaMo translation | 53.1% | 54.7% | 25.6% |
+| Learned textual prefix with Japanese input | 73.8% | 60.2% | 8.0% |
+
+These are last-number exact-match scores, which tolerate explanations but can
+also pick an intermediate number. The report gives strict scores, raw answers,
+output-cap counts, per-operation results and paired uncertainty. Fitted methods
+receive task supervision that the frozen text baselines do not. A separate
+16-item memorization diagnostic confirms a functioning source-dependent
+connection; it is not a held-out result.
+
+- [English research report (PDF)](docs/report.pdf)
+- [LaTeX source](docs/report.tex) and [experiment protocol](docs/protocol.md)
+- [Full metrics](results/main/summary.json) and [raw predictions](results/main/predictions/)
+- [Upstream models and data attribution](THIRD_PARTY.md)
 
 ## What is implemented
 
@@ -34,7 +52,7 @@ and must be reported with every comparison.
   explicitly item by item.
 - Per-item predictions, per-operation summaries, seed variation, paired item
   bootstrap intervals, learning curves and an accuracy comparison plot.
-- An optional loader for the external Japanese MGSM test split.
+- Evaluation on all 250 questions in the external Japanese MGSM test split.
 
 ## Environment
 
@@ -166,13 +184,31 @@ runs/<experiment>/<run>/   config, environment, history and best checkpoint
 results/<experiment>/      predictions, metadata, shuffle mapping, summary, plots
 ```
 
-Per-item predictions are JSONL. Summary metrics are JSON. The two required
-plots are saved as PNG and vector PDF under
+Per-item predictions are JSONL. Summary metrics are JSON. Figures are saved as
+PNG and vector PDF under
 `results/<experiment>/plots/learning_curves.*` and
 `results/<experiment>/plots/accuracy_comparison.*`. The smoke configuration
 uses isolated paths under `local/smoke/` so its shortened caches can never be
 consumed by a full run. Feature caches carry an item-ID manifest and are
 rebuilt or rejected when rows, layers, prefixes or the source revision change.
+
+The post hoc memorization diagnostic is separate from the primary matrix:
+
+```bash
+bash scripts/run_overfit_diagnostic.sh
+```
+
+It intentionally copies 16 training items into validation, selects by
+resubstitution loss, and evaluates those same items and a source-shuffled
+control. Its data and metadata explicitly record the overlap. Outputs under
+`results/overfit_diagnostic/` cannot be interpreted as generalization scores.
+
+The report can be built with a standard pdfLaTeX installation:
+
+```bash
+latexmk -pdf -cd -outdir=.build docs/report.tex
+cp docs/.build/report.pdf docs/report.pdf
+```
 
 ## Limitations
 
@@ -182,5 +218,6 @@ rebuilt or rejected when rows, layers, prefixes or the source revision change.
   are frozen zero-shot systems.
 - Synthetic-only training cannot establish broad multilingual reasoning, and
   pretraining contamination cannot be excluded.
-- The external MGSM split is reported separately if it can be downloaded and
-  executed. Its reference answers are evaluation-only.
+- MGSM reference answers are evaluation-only. Long explanations reach the
+  answer cap for 119/250 translated-input cases, which limits interpretation
+  of the last-number diagnostic as reasoning accuracy.

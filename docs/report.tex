@@ -1,0 +1,37 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=24mm]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx}
+\usepackage{graphicx}
+\usepackage[round,authoryear]{natbib}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Conditioning a Frozen Language Model on PLaMo Translation Hidden States},
+  pdfauthor={tetsuya-dev-jp}
+}
+\graphicspath{{../results/main/plots/}}
+\setlength{\emergencystretch}{2em}
+\setlength{\tabcolsep}{4pt}
+\title{Conditioning a Frozen Language Model on\\PLaMo Translation Hidden States:\\An Exploratory Study}
+\author{\href{https://github.com/tetsuya-dev-jp}{tetsuya-dev-jp}}
+\date{8 November 2026}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\input{introduction}
+\input{method}
+\input{experiments}
+\input{results}
+\input{discussion}
+\input{reproduction}
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

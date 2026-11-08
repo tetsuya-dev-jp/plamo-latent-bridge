@@ -1,0 +1,73 @@
+\section{Experimental design}
+\label{sec:experiments}
+
+\subsection{Generated questions and partitioning}
+
+The controlled dataset contains paired Japanese and English questions for four equally frequent families: addition, subtraction, multiplication, and a two-step operation.
+The two-step family combines either addition followed by subtraction or multiplication followed by subtraction.
+The generator computes integer reference answers directly from the sampled operands.
+Names and objects come from small fixed vocabularies shared across partitions.
+Each family has two main surface templates; separate templates provide the wording holdout.
+
+The fixed generator seed is 20261108.
+There are 1,024 training, 128 validation, 256 test and 128 wording-holdout questions, with equal numbers from each family in each partition.
+Numeric operation-and-operand keys are disjoint across all four partitions.
+Commutative operand pairs are sorted in these keys, including the first two operands of two-step questions.
+This prevents a swapped multiplicative pair from appearing as the same arithmetic instance in both training and evaluation.
+It does not make the arithmetic rules, individual numbers, names or objects unseen.
+The wording holdout changes both the template and the numeric instance; it is not a paired paraphrase of the ordinary test set.
+
+Before full runs, a small wiring pilot exposed four examples from each preliminary test partition.
+That pilot revealed a generator key defect and a scoring distinction between numeric correctness and numeric-only formatting.
+The corrected generator, both scoring rules and common decoding limits were fixed before full experiments.
+This remains an exploratory evaluation rather than an untouched confirmatory test.
+The protocol and generated JSONL files preserve the partition rules and the pilot amendments.
+
+\subsection{External endpoint}
+
+The external evaluation uses all 250 Japanese MGSM test questions from the official repository~\citep{shi2022mgsm}.
+The loader pins repository revision \texttt{452a21ad3dae5668c06ceeac21ff073e1e40f9be}.
+MGSM answers enter scoring only; neither its questions nor its answers are used for bridge fitting or checkpoint selection.
+The bridge is therefore evaluated under a substantial change from its short synthetic training distribution.
+Unlike the original MGSM study, this protocol supplies no few-shot chain-of-thought examples and asks for the final number only.
+The results should not be compared directly with published chain-of-thought scores obtained under other prompting protocols.
+
+\subsection{Fitting and comparisons}
+
+The main bridge uses source layer 8 and prefix length 16, with independent training seeds 11, 23 and 37.
+Layer 4, layer 16 and a four-token prefix are separate ablations at seed 11.
+All fitted conditions use AdamW with learning rate $10^{-3}$, zero weight decay, gradient-norm clipping at 1.0, batch size 16 and ten epochs.
+The saved checkpoint minimizes validation answer-token cross-entropy across the ten epochs.
+No test score selects a checkpoint or the main layer.
+The pretrained backbones run in BF16; the bridge parameters and cached pooled features use FP32.
+The plotted training loss averages minibatch losses; validation loss is weighted by the number of supervised answer tokens.
+Changing the bridge prefix length changes the target sequence length, while the shared affine map retains the same parameter count.
+
+The learned textual soft prefix uses the same training examples, optimizer, epoch budget and checkpoint rule, at seed 11.
+Its smaller parameter count and direct access to Japanese text remain material differences.
+The untrained bridge uses the main architecture and seed without fitting.
+The shuffled condition keeps the trained main bridge but permutes source feature sequences across evaluation questions, preserving an explicit mapping for each split.
+The frozen textual systems receive either Japanese, the paired English template, or an actual PLaMo English translation.
+The external endpoint has no paired-template English condition.
+
+\subsection{Decoding, scoring and uncertainty}
+
+Every answering condition uses greedy, free-running decoding with the same instruction to return the final number.
+The cap is 128 new tokens for the generated tasks and 256 for MGSM.
+PLaMo translation has caps of 128 and 512 tokens, respectively.
+Per-item records include the generated text, emitted length, normal termination and cap-hit status.
+The bridge path does not use generated translations or target answer tokens as inference inputs.
+
+The originally specified strict exact match normalizes surrounding whitespace, special-token text, digit width, commas and a terminal period, and requires the complete remaining output to be the reference integer.
+It therefore measures answer-format compliance together with correctness.
+The secondary last-number exact match extracts the final numeric literal from the generated text and compares its exact decimal value with the integer reference.
+For example, a correct arithmetic explanation ending in a number with a unit can pass the secondary score while failing the strict score.
+This diagnostic is not a semantic verifier: an unfinished explanation can end in an operand rather than a final answer.
+Cap-hit rates and raw predictions make this distinction inspectable.
+
+Overall accuracy is the fraction of correct items; equal family counts make the synthetic overall score equal to the mean of the four family accuracies.
+Selected differences use 10,000 paired bootstrap resamples of evaluation item IDs, with seed 20261108 and percentile 95\% intervals.
+The same sampled IDs are used on both sides of each comparison.
+These intervals are conditional on the fitted models and the particular evaluation set; they do not quantify all training variability.
+The three main training seeds are reported separately and summarized without treating seeds as independent test items.
+The ablations and their intervals are exploratory, with no multiple-comparison correction.

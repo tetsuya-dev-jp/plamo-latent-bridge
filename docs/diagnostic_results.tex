@@ -1,0 +1,30 @@
+\subsection{Post hoc capacity check: a small mapping can be memorized}
+
+The low primary scores motivated a separate capacity diagnostic after the main
+matrix had completed.
+A newly initialized main-architecture bridge was fitted to 16 generated questions
+with data seed 20261110, batch size 8 and 100 epochs.
+For this diagnostic only, validation was an exact copy of those training items,
+and checkpoint selection minimized resubstitution loss.
+The dataset metadata explicitly marks the intended overlap.
+This condition measures memorization capacity, not held-out performance, and
+changes both dataset size and the number of exposures per question.
+
+The fitted bridge answers all 16 training questions correctly.
+When their source prefixes are shuffled, only 3/16 answers match the original
+target references, but all 16 outputs equal the answer associated with the
+\emph{supplied source} question.
+The three remaining target matches consist of one fixed point in the permutation
+and two coincident reference answers.
+Thus the interface can memorize a small source-dependent mapping; its poor main
+result is not evidence that the computational path is incapable of transmitting
+any learned correspondence.
+Together with the main fit's 8.7\% training accuracy, the diagnostic points to
+difficulty fitting the larger problem under the selected representation and
+optimization budget, rather than a failure confined to unseen questions.
+It does not identify which architectural or training change would resolve that
+difficulty.
+
+The diagnostic has its own configuration, data, histories, source-shuffle mapping
+and raw predictions under \path{overfit_diagnostic}; its resubstitution scores are
+excluded from Table~\ref{tab:accuracy} and the primary accuracy figure.

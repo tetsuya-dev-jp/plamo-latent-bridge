@@ -1,0 +1,102 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 1.737190529704094,
+    "val_loss": 1.601746474487194,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 11.818,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 2,
+    "train_loss": 1.6180729027837515,
+    "val_loss": 1.5375973374947258,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.25,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 3,
+    "train_loss": 1.5589181147515774,
+    "val_loss": 1.4944899741578217,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 7.99,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 4,
+    "train_loss": 1.5012040305882692,
+    "val_loss": 1.4558193355366804,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 7.982,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 5,
+    "train_loss": 1.4325624331831932,
+    "val_loss": 1.4067800983714596,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.041,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 6,
+    "train_loss": 1.3711185436695814,
+    "val_loss": 1.3389741968417512,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.143,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 7,
+    "train_loss": 1.3210526946932077,
+    "val_loss": 1.4049165415879032,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.012,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 8,
+    "train_loss": 1.291058899834752,
+    "val_loss": 1.3675980187844539,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.003,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 9,
+    "train_loss": 1.2070635706186295,
+    "val_loss": 1.3523985481492564,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.016,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  },
+  {
+    "epoch": 10,
+    "train_loss": 1.1771515114232898,
+    "val_loss": 1.257695129816083,
+    "steps": 64,
+    "answer_tokens": 3297,
+    "elapsed_seconds": 8.121,
+    "peak_gpu_memory_gib": 6.933,
+    "learning_rate": 0.001
+  }
+]
