@@ -1,0 +1,31 @@
+{
+  "extends": "default.json",
+  "experiment_id": "overfit_diagnostic",
+  "source": {
+    "layers": [8],
+    "prefix_lengths": [16]
+  },
+  "paths": {
+    "data_dir": "diagnostics/overfit/data",
+    "features_dir": "features/overfit_diagnostic",
+    "runs_dir": "runs",
+    "results_dir": "results"
+  },
+  "data": {
+    "train": 16,
+    "val": 16,
+    "test": 4,
+    "heldout": 4,
+    "seed": 20261110
+  },
+  "training": {
+    "batch_size": 8,
+    "epochs": 100,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0
+  },
+  "generation": {
+    "max_new_tokens": 128
+  }
+}

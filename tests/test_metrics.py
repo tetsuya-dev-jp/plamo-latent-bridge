@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from plamo_bridge.analysis import paired_bootstrap
+from plamo_bridge.analysis import _accuracy_interval, paired_bootstrap
 from plamo_bridge.utils import exact_match, extract_last_number, last_number_exact_match, normalize_answer
 
 
@@ -46,6 +46,18 @@ def test_paired_bootstrap_preserves_fractional_seed_averages():
     result = paired_bootstrap(rows_a, rows_b, resamples=500, seed=7)
     assert result["n_items"] == 3
     assert result["delta"] == pytest.approx(1 / 3)
+
+
+def test_wilson_interval_keeps_extreme_conditions_non_degenerate():
+    all_wrong = [{"id": f"i{index}", "correct": False} for index in range(20)]
+    lower, upper = _accuracy_interval(all_wrong)
+    assert lower == 0.0
+    assert upper > 0.0
+
+    all_correct = [{"id": f"i{index}", "correct": True} for index in range(20)]
+    lower, upper = _accuracy_interval(all_correct)
+    assert lower < 1.0
+    assert upper == 1.0
 
 
 def test_last_number_diagnostic_extracts_final_numeric_literal():

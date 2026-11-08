@@ -45,6 +45,12 @@ SEED_CONDITIONS = {
     "bridge_l8_k16": ("bridge_l8_k16_s11", "bridge_l8_k16_s23", "bridge_l8_k16_s37"),
 }
 
+SPLIT_TITLES = (
+    ("test", "Synthetic test"),
+    ("heldout", "Template holdout"),
+    ("mgsm", "MGSM"),
+)
+
 
 def _load_predictions(config: Config) -> dict[tuple[str, str], list[dict[str, Any]]]:
     directory = Path(config.paths.results_dir) / config.experiment_id / "predictions"
@@ -229,9 +235,13 @@ def analyze(config: Config) -> dict[str, Any]:
         "learning_curves_pdf": str(learning_plot.with_suffix(".pdf")),
         "accuracy_comparison_png": str(comparison_plot),
         "accuracy_comparison_pdf": str(comparison_plot.with_suffix(".pdf")),
+        "single_condition_interval": (
+            "Wilson score 95% confidence interval on per-item binary correctness "
+            "(not a paired effect interval; paired differences are in paired_bootstrap)."
+        ),
     }
     _plot_learning(config, learning_plot)
-    _plot_comparison(grouped, summary, comparison_plot, config)
+    _plot_comparison(grouped, summary, comparison_plot)
     write_json(Path(config.paths.results_dir) / config.experiment_id / "summary.json", summary)
     return summary
 
@@ -251,30 +261,66 @@ def _plot_learning(config: Config, output: Path) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    histories = _load_histories(config)
-    figure, axes = plt.subplots(1, 2, figsize=(11, 4))
+    available = dict(_load_histories(config))
+    histories = [
+        (run_name, available[run_name])
+        for run_name in SEED_CONDITIONS["bridge_l8_k16"]
+        if run_name in available
+    ]
+    styles = {
+        "bridge_l8_k16_s11": ("#000000", "o", "-"),
+        "bridge_l8_k16_s23": ("#555555", "s", "--"),
+        "bridge_l8_k16_s37": ("#999999", "^", "-."),
+    }
+    plt.rcParams.update({"font.size": 8, "axes.titlesize": 9, "axes.labelsize": 8})
+    figure, axes = plt.subplots(1, 2, figsize=(7.2, 3.2), sharex=True)
     for run_name, history in histories:
         epochs = [row["epoch"] for row in history]
-        axes[0].plot(epochs, [row["train_loss"] for row in history], marker="o", label=run_name)
-        axes[1].plot(epochs, [row["val_loss"] for row in history], marker="o", label=run_name)
-    for axis, title in zip(axes, ("Training loss", "Validation loss")):
+        color, marker, linestyle = styles.get(run_name, ("#000000", "o", "-"))
+        label = f"seed {run_name.rsplit('_s', 1)[-1]}"
+        axes[0].plot(
+            epochs,
+            [row["train_loss"] for row in history],
+            color=color,
+            marker=marker,
+            linestyle=linestyle,
+            markersize=3.5,
+            linewidth=1.2,
+            label=label,
+        )
+        axes[1].plot(
+            epochs,
+            [row["val_loss"] for row in history],
+            color=color,
+            marker=marker,
+            linestyle=linestyle,
+            markersize=3.5,
+            linewidth=1.2,
+            label=label,
+        )
+    axes[0].set_title("Training loss")
+    axes[1].set_title("Validation loss")
+    axes[0].set_ylabel("Mean minibatch CE")
+    axes[1].set_ylabel("Answer-token-weighted CE")
+    for axis in axes:
         axis.set_xlabel("Epoch")
-        axis.set_ylabel("Cross-entropy")
-        axis.set_title(title)
         axis.grid(alpha=0.25)
-    if histories:
-        axes[1].legend(fontsize=7)
-    figure.tight_layout()
-    figure.savefig(output, dpi=160)
+        axis.set_axisbelow(True)
+    figure.suptitle("Main L8/K16 setting (three seeds)", fontsize=9)
+    handles, labels = axes[0].get_legend_handles_labels()
+    if handles:
+        figure.legend(handles, labels, loc="lower center", ncol=3, fontsize=7.5, frameon=False)
+    figure.tight_layout(rect=(0, 0.08, 1, 0.94))
+    figure.savefig(output, dpi=300)
     figure.savefig(output.with_suffix(".pdf"))
     plt.close(figure)
 
 
 def _human_label(condition: str) -> str:
     fixed = {
-        "text_ja": "Text JA",
-        "text_en": "Text EN",
-        "text_plamo_en": "PLaMo translation",
+        "text_ja": "Text prompt (JA)",
+        "text_en": "Text prompt (EN)",
+        "text_plamo_en": "PLaMo translation (EN)",
         "softprefix_k16_s11": "Soft prefix K16 s11",
     }
     if condition in fixed:
@@ -286,93 +332,136 @@ def _human_label(condition: str) -> str:
         seed = parts[3][1:]
         label = f"Bridge L{layer} K{prefix} s{seed}"
         if condition.endswith("_untrained"):
-            label += " untrained"
+            label += " (untrained)"
         elif condition.endswith("_shuffled"):
-            label += " shuffled"
+            label += " (shuffled)"
         return label
     return condition
+
+
+def _split_sample_size(summary: dict[str, Any], split: str) -> int | None:
+    sizes = {scores["n"] for scores in summary["splits"][split]["conditions"].values()}
+    return sizes.pop() if len(sizes) == 1 else None
 
 
 def _plot_comparison(
     grouped: dict[tuple[str, str], list[dict[str, Any]]],
     summary: dict[str, Any],
     output: Path,
-    config: Config,
 ) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from matplotlib.ticker import PercentFormatter
 
-    splits = [split for split in ("test", "heldout") if split in summary["splits"]]
+    split_titles = dict(SPLIT_TITLES)
+    splits = [split for split, _ in SPLIT_TITLES if split in summary["splits"]]
     if not splits:
         splits = sorted(summary["splits"])
     conditions = _ordered_conditions(
         condition for split in splits for condition in summary["splits"][split]["conditions"]
     )
     labels = [_human_label(condition) for condition in conditions]
-    height = max(5.5, len(conditions) * 0.42)
-    figure, axes = plt.subplots(1, 2, figsize=(14, height), sharey=True)
-    bar_height = 0.8 / max(1, len(splits))
     metrics = (
-        ("exact_match", "correct", "Strict exact match"),
-        ("last_number_exact_match", "last_number_correct", "Last-number diagnostic"),
+        ("exact_match", "correct", "o", "black"),
+        ("last_number_exact_match", "last_number_correct", "s", "white"),
     )
-    for axis, (metric, flag_key, title) in zip(axes, metrics):
-        for split_index, split in enumerate(splits):
-            values = []
-            errors = []
-            positions = []
-            for condition_index, condition in enumerate(conditions):
-                scores = summary["splits"][split]["conditions"].get(condition)
-                if scores is None:
-                    continue
-                positions.append(condition_index + (split_index - (len(splits) - 1) / 2) * bar_height)
+    offset = 0.17
+
+    plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5, "axes.labelsize": 8})
+    figure, axes = plt.subplots(
+        1,
+        len(splits),
+        figsize=(7.6, 6.2),
+        sharey=True,
+        sharex=True,
+        squeeze=False,
+    )
+    axes = axes[0]
+    for axis, split in zip(axes, splits):
+        for condition_index, condition in enumerate(conditions):
+            scores = summary["splits"][split]["conditions"].get(condition)
+            if scores is None:
+                continue
+            rows = grouped.get((condition, split), [])
+            for metric_index, (metric, flag_key, marker, face) in enumerate(metrics):
                 value = scores[metric]
-                lower, upper = _accuracy_interval(
-                    grouped.get((condition, split), []),
-                    config.evaluation.bootstrap_resamples,
-                    config.evaluation.bootstrap_seed,
-                    flag_key,
+                if value is None:
+                    continue
+                lower, upper = _accuracy_interval(rows, flag_key)
+                point = 100.0 * value
+                y_position = condition_index + (metric_index - 0.5) * 2 * offset
+                axis.errorbar(
+                    point,
+                    y_position,
+                    xerr=[[point - 100.0 * lower], [100.0 * upper - point]],
+                    fmt=marker,
+                    color="black",
+                    markerfacecolor=face,
+                    markeredgecolor="black",
+                    markeredgewidth=0.7,
+                    markersize=4.0,
+                    elinewidth=0.8,
+                    capsize=1.5,
+                    capthick=0.8,
+                    linestyle="none",
+                    zorder=3,
                 )
-                values.append(value)
-                errors.append((value - lower, upper - value))
-            axis.barh(
-                positions,
-                values,
-                height=bar_height,
-                label=split,
-                xerr=np.asarray(errors).T,
-                capsize=2,
-                alpha=0.85,
-                edgecolor="black",
-                linewidth=0.4,
-            )
-        axis.set_xlim(0, 1)
-        axis.set_xlabel("Accuracy")
+        sample_size = _split_sample_size(summary, split)
+        title = split_titles.get(split, split)
+        if sample_size is not None:
+            title = f"{title} (n={sample_size})"
         axis.set_title(title)
+        axis.set_xlim(0, 100)
+        axis.set_xlabel("Accuracy")
+        axis.xaxis.set_major_formatter(PercentFormatter(xmax=100, decimals=0))
         axis.grid(axis="x", alpha=0.25)
-        axis.legend(loc="lower right")
+        axis.set_axisbelow(True)
+
     axes[0].set_yticks(np.arange(len(conditions)))
-    axes[0].set_yticklabels(labels, fontsize=8)
+    axes[0].set_yticklabels(labels, fontsize=7.5)
+    axes[0].set_ylabel("Study condition")
     axes[0].invert_yaxis()
-    figure.suptitle("Accuracy by condition (bars: 95% item-bootstrap interval)")
-    figure.tight_layout()
-    figure.savefig(output, dpi=160)
+
+    handles = [
+        Line2D([], [], marker="o", color="black", linestyle="none", markersize=4.0,
+               label="Strict exact match"),
+        Line2D([], [], marker="s", color="black", markerfacecolor="white", linestyle="none",
+               markersize=4.0, label="Last-number diagnostic"),
+    ]
+    figure.legend(
+        handles=handles,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.055),
+        ncol=2,
+        fontsize=7.5,
+        frameon=False,
+    )
+    figure.text(
+        0.5,
+        0.008,
+        "Points: per-condition accuracy. Bars: Wilson score 95% CI from per-item binary "
+        "correctness (not paired differences). Blank rows were not run on that split.",
+        ha="center",
+        fontsize=6.5,
+    )
+    figure.tight_layout(rect=(0, 0.12, 1, 1))
+    figure.savefig(output, dpi=300)
     figure.savefig(output.with_suffix(".pdf"))
     plt.close(figure)
 
 
 def _accuracy_interval(
-    rows: list[dict[str, Any]], resamples: int, seed: int, flag_key: str = "correct"
+    rows: list[dict[str, Any]], flag_key: str = "correct"
 ) -> tuple[float, float]:
     if not rows:
-        return 0.0, 0.0
-    values = np.asarray([float(bool(row.get(flag_key))) for row in rows])
-    if len(values) < 2:
-        return 0.0, 0.0
-    rng = np.random.default_rng(seed)
-    indices = rng.integers(0, len(values), size=(resamples, len(values)))
-    means = values[indices].mean(axis=1)
-    lower, upper = np.percentile(means, [2.5, 97.5])
-    return float(lower), float(upper)
+        return 0.0, 1.0
+    from scipy.stats import binomtest
+
+    correct = sum(bool(row.get(flag_key)) for row in rows)
+    interval = binomtest(correct, len(rows)).proportion_ci(
+        confidence_level=0.95, method="wilson"
+    )
+    return float(interval.low), float(interval.high)
