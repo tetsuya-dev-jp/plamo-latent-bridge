@@ -1,0 +1,12 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 1.2126347720623016,
+    "val_loss": 1.5124987363815308,
+    "steps": 2,
+    "answer_tokens": 102,
+    "elapsed_seconds": 2.863,
+    "peak_gpu_memory_gib": 9.149,
+    "learning_rate": 0.001
+  }
+]

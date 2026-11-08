@@ -1,0 +1,30 @@
+{
+  "extends": "default.json",
+  "experiment_id": "smoke",
+  "training": {
+    "batch_size": 8,
+    "epochs": 1,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0
+  },
+  "paths": {
+    "data_dir": "local/smoke/data",
+    "features_dir": "local/smoke/features",
+    "runs_dir": "local/smoke/runs",
+    "results_dir": "local/smoke/results"
+  },
+  "generation": {
+    "max_new_tokens": 16,
+    "mgsm_max_new_tokens": 16,
+    "translation_max_new_tokens": 64,
+    "mgsm_translation_max_new_tokens": 64
+  },
+  "limits": {
+    "train": 8,
+    "val": 4,
+    "test": 4,
+    "heldout": 4,
+    "mgsm": 4
+  }
+}

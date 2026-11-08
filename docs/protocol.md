@@ -44,6 +44,8 @@ The learned bridge has task supervision that the three frozen textual baselines 
 
 Benchmark a small batch before full runs; choose a feasible batch size without changing the research question. Initial candidates: AdamW, learning rate 1e-3, up to 10 epochs, batch 8, gradient clipping 1.0. Record actual settings and changes; select checkpoints using validation data only. Save per-epoch loss, validation loss, elapsed times, peak memory, selected checkpoint, every per-item prediction and metrics.
 
+An independent memory probe used 32 training and eight validation examples generated with seed 20261109, one epoch, and the longer text-conditioned soft-prefix path. Batch 16 used 9.149 GiB of peak allocated GPU memory and completed two optimizer steps. Select batch 16 for all full training conditions based on this resource check; no test answers were evaluated in that probe.
+
 Check split disjointness, arithmetic answers, masking/pooling, causal answer loss alignment, that only bridge parameters receive gradients, and that bridge parameters update while both backbones remain frozen. Include tiny tests that do not need downloading full model weights. Avoid artifact hashes.
 
 Report per-condition exact match, per-operation and held-out-template results, seed variation, learning curves and paired item bootstrap confidence intervals for selected differences. Explain the resampling unit; do not treat correlated training seeds as independent test items. Distinguish measured throughput from expected performance, and source extraction/translation costs from target decoding costs.

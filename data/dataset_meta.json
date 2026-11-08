@@ -1,0 +1,56 @@
+{
+  "seed": 20261108,
+  "counts": {
+    "train": 1024,
+    "val": 128,
+    "test": 256,
+    "heldout": 128
+  },
+  "operations": [
+    "addition",
+    "subtraction",
+    "multiplication",
+    "two_step"
+  ],
+  "template_ids": {
+    "train": [
+      "main_add_receive",
+      "main_add_shop",
+      "main_mul_bags",
+      "main_mul_boxes",
+      "main_sub_give",
+      "main_sub_use",
+      "main_two_box_use",
+      "main_two_buy_give"
+    ],
+    "val": [
+      "main_add_receive",
+      "main_add_shop",
+      "main_mul_bags",
+      "main_mul_boxes",
+      "main_sub_give",
+      "main_sub_use",
+      "main_two_box_use",
+      "main_two_buy_give"
+    ],
+    "test": [
+      "main_add_receive",
+      "main_add_shop",
+      "main_mul_bags",
+      "main_mul_boxes",
+      "main_sub_give",
+      "main_sub_use",
+      "main_two_box_use",
+      "main_two_buy_give"
+    ],
+    "heldout": [
+      "heldout_add_home",
+      "heldout_mul_prepare",
+      "heldout_sub_lost",
+      "heldout_two_order_use",
+      "heldout_two_return"
+    ]
+  },
+  "semantic_key_rule": "Commutative operand pairs are sorted before key construction, including the first two operands of two-step add/sub and mul/sub problems.",
+  "note": "Synthetic paired arithmetic data. Semantic tuples are disjoint across splits."
+}

@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+local/
+features/
+runs/**/checkpoints/
+runs/**/optimizer.pt
+data/mgsm_ja_test.jsonl
+data/mgsm_meta.json
+*.log

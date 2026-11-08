@@ -1,0 +1,62 @@
+{
+  "experiment_id": "memory_probe",
+  "seed": 20261108,
+  "paths": {
+    "data_dir": "local/memory-probe/data",
+    "features_dir": "local/memory-probe/features",
+    "runs_dir": "local/memory-probe/runs",
+    "results_dir": "local/memory-probe/results"
+  },
+  "source": {
+    "model_id": "pfnet/plamo-3-translate-0.8b",
+    "revision": "2c6192f709695aa4b50f73713620651a533b88c9",
+    "layers": [
+      4,
+      8,
+      16
+    ],
+    "prefix_lengths": [
+      16,
+      4
+    ],
+    "dtype": "bfloat16"
+  },
+  "target": {
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "dtype": "bfloat16",
+    "attn_implementation": "eager"
+  },
+  "data": {
+    "train": 32,
+    "val": 8,
+    "test": 4,
+    "heldout": 4,
+    "seed": 20261109
+  },
+  "training": {
+    "batch_size": 16,
+    "epochs": 1,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0
+  },
+  "generation": {
+    "max_new_tokens": 128,
+    "mgsm_max_new_tokens": 256,
+    "translation_max_new_tokens": 128,
+    "mgsm_translation_max_new_tokens": 512
+  },
+  "evaluation": {
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 20261108
+  },
+  "limits": {
+    "train": null,
+    "val": null,
+    "test": null,
+    "heldout": null,
+    "mgsm": null
+  },
+  "cpu_threads": 6
+}
